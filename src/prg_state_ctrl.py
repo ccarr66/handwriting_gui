@@ -24,7 +24,7 @@ class PrgStateCtrl:
     _outputFileName = "results_" + str(_saveCount)
     _outputFilePath = _execPath
 
-    _cachedImage = PIL.Image.new('RGBA', (400, 50), (0,0,0,0))
+    _cachedImage = PIL.Image.new('RGBA', (400, 550), (0,0,0,0))
 
     def __init__(self):
         if(debug):
@@ -75,7 +75,7 @@ class PrgStateCtrl:
     def LoadImage(self, imageName):
         if self.isValidImg(imageName):
             self._imgName = imageName
-            self._cachedImage = self.GetScaledImage(PIL.Image.open(self.GetImagePath() + self._imgName), 400, 600)
+            self._cachedImage = self.GetScaledImage(PIL.Image.open(self.GetImagePath() + self._imgName), 400, 550)
             return True
         else:
             return False
