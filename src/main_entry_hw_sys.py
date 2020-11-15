@@ -1,11 +1,13 @@
-import ocr_image_analyzer as OCR
 import prg_state_ctrl as PSC
-import PIL.Image
-import PIL.ImageTk
 
-from tkinter import *
-from tkinter import ttk
-from tkinter.scrolledtext import ScrolledText
+try:
+    import PIL.Image
+    import PIL.ImageTk
+    from tkinter import *
+    from tkinter import ttk
+    from tkinter.scrolledtext import ScrolledText
+except ModuleNotFoundError:
+    print('Required libraries not found, please install tkinter & PIL')
 
 #*******************************************************    main window
 mainWindow = Tk()
@@ -32,33 +34,71 @@ def LoadImage():
         newWindow.title("Error") 
         
         # A Label widget to show in toplevel 
-        Label(newWindow, text = "Text entered is not a valid image. Must be in same directory as executable").pack()
+        errorLbl = Label(newWindow, text = "Text entered is not a valid image. Must be in same directory as executable")
+        errorLbl.grid(row=0, column=0, padx=15, pady=15)
     else:
         cachedImage = PIL.ImageTk.PhotoImage(globState.GetCachedImage())
         imgDisplayLbl.configure(image=cachedImage)
         imgDisplayLbl.image = cachedImage
+        imgDisplayLbl.update_idletasks()
 
 def ParseImage():
-    strOut = OCR.analyzeImage(globState.GetImageFullPath(), globState.GetModelFullPath())
-
-    displOut = "" 
-    # traverse in the string  
-    for x in strOut: 
-        displOut += x 
+    globState.PerformOCR()
 
     outputText['state'] = "normal"
     outputText.delete('1.0', END)
-    outputText.insert(END, displOut)
+    outputText.insert(END, globState.GetOutputText())
     outputText.update_idletasks()
     outputText['state'] = "disabled"
+
+    cachedImage = PIL.ImageTk.PhotoImage(globState.GetNextOutputImage())
+    imgDisplayLbl.configure(image=cachedImage)
+    imgDisplayLbl.image = cachedImage
+    imgDisplayLbl.update_idletasks()
+
+def NextImage():
+    cachedImage = PIL.ImageTk.PhotoImage(globState.GetNextOutputImage())
+    imgDisplayLbl.configure(image=cachedImage)
+    imgDisplayLbl.image = cachedImage
+    imgDisplayLbl.update_idletasks()
+
+def PrevImage():
+    cachedImage = PIL.ImageTk.PhotoImage(globState.GetPrevOutputImage())
+    imgDisplayLbl.configure(image=cachedImage)
+    imgDisplayLbl.image = cachedImage
+    imgDisplayLbl.update_idletasks()
+
+def SaveDialog():
+    saveWindow = Toplevel(mainWindow) 
+    saveWindow.title("Save File") 
+    saveWindow.resizable(False,False)
+
+    fileNameLbl = Label(saveWindow, text = "File name:")
+    fileNameLbl.grid(row=0, column=0, padx=5, pady=5)
+
+    filePathLbl = Label(saveWindow, text = "File path:")
+    filePathLbl.grid(row=1, column=0, padx=5, pady=5)
+
+    fileNameEntry = Entry(saveWindow, width = 50)
+    fileNameEntry.grid(row=0, column=1, padx=5, pady=5)
+    fileNameEntry.insert(END, globState.GetOutputName())
+    fileNameEntry.update_idletasks()
+
+    filePathEntry = Entry(saveWindow, width = 50)
+    filePathEntry.grid(row=1, column=1, padx=5, pady=5)
+    filePathEntry.insert(END, globState.GetOutputPath())
+    filePathEntry.update_idletasks()
+
+
+
 
 #*******************************************************    WIDGETS
 content = ttk.Frame(mainWindow)
 
 lhsFrame = ttk.Frame(content)
 imgDisplayLbl = ttk.Label(lhsFrame, image=cachedImage)
-prevBtn = ttk.Button(lhsFrame, text="Prev")
-nextBtn = ttk.Button(lhsFrame, text="Next")
+prevBtn = ttk.Button(lhsFrame, command=PrevImage, text="Prev")
+nextBtn = ttk.Button(lhsFrame, command=NextImage, text="Next")
 
 dividerFrame = ttk.Frame(content)
 dividerImg = PIL.ImageTk.PhotoImage(PIL.Image.new('RGBA', (5, 600), (100, 100, 100, 0xff)))
@@ -73,7 +113,7 @@ outputLbl = ttk.Label(rhsFrame, text="Output Text",)
 outputText = ScrolledText(rhsFrame, state="disabled", width = 42, height=7)
 outputGenBtn = ttk.Button(rhsFrame, command = ParseImage, text="Generate Output", width=20)
 
-outputSaveBtn = ttk.Button(rhsFrame, text="Save Output", width=20)
+outputSaveBtn = ttk.Button(rhsFrame, command=SaveDialog, text="Save Output", width=20)
 
 #******************************************************     GRID
 content.grid(column=0, row=0, sticky="NSEW")

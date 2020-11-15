@@ -6,7 +6,6 @@ import imutils
 
 def get_lines(image, show=False):
     """
-    :param image:
     :return: list of roi parameters for lines
     """
     # grayscale
