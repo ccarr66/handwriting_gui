@@ -1,5 +1,5 @@
 import prg_state_ctrl as PSC
-
+import txt_disk_output as OUT
 try:
     import PIL.Image
     import PIL.ImageTk
@@ -23,6 +23,12 @@ globState = PSC.PrgStateCtrl()
 cachedImage = PIL.ImageTk.PhotoImage(globState.GetCachedImage())
 imageName = StringVar()
 
+saveWindow = None
+saveWindowOpen = False
+
+outputFileName = StringVar()
+outputFilePath = StringVar()
+outputDocType = StringVar()
 #*******************************************************    gui state control
 
 def LoadImage():
@@ -68,27 +74,51 @@ def PrevImage():
     imgDisplayLbl.image = cachedImage
     imgDisplayLbl.update_idletasks()
 
+def SaveFile():
+    filePath = outputFilePath.get() + PSC.filepathSlash + outputFileName.get()
+    if outputDocType.get() == 'docx':
+        OUT.writeToDocx(filePath, globState.GetOutputText())
+    if outputDocType.get() == 'odt':
+        OUT.writeToOdt(filePath, globState.GetOutputText())
+    saveWindow.destroy()
+
 def SaveDialog():
-    saveWindow = Toplevel(mainWindow) 
-    saveWindow.title("Save File") 
-    saveWindow.resizable(False,False)
+    global saveWindowOpen
+    global saveWindow
+    global outputFileName
+    global outputFilePath
+    if saveWindowOpen is False:
+        saveWindowOpen = True
 
-    fileNameLbl = Label(saveWindow, text = "File name:")
-    fileNameLbl.grid(row=0, column=0, padx=5, pady=5)
+        saveWindow = Toplevel(mainWindow) 
+        saveWindow.title("Save File") 
+        saveWindow.resizable(False,False)
+        saveWindow.rowconfigure((0,2), weight=1)
 
-    filePathLbl = Label(saveWindow, text = "File path:")
-    filePathLbl.grid(row=1, column=0, padx=5, pady=5)
+        fileNameLbl = ttk.Label(saveWindow, text = "File name:")
+        fileNameLbl.grid(row=0, column=0, padx=5, pady=5)
 
-    fileNameEntry = Entry(saveWindow, width = 50)
-    fileNameEntry.grid(row=0, column=1, padx=5, pady=5)
-    fileNameEntry.insert(END, globState.GetOutputName())
-    fileNameEntry.update_idletasks()
+        filePathLbl = ttk.Label(saveWindow, text = "File path:")
+        filePathLbl.grid(row=1, column=0, padx=5, pady=5)
+        
+        outputFileName = StringVar(saveWindow,value=globState.GetOutputName())
+        fileNameEntry = ttk.Entry(saveWindow, textvariable=outputFileName, width = 50)
+        fileNameEntry.grid(row=0, column=1, columnspan=3, padx=5, pady=5)
 
-    filePathEntry = Entry(saveWindow, width = 50)
-    filePathEntry.grid(row=1, column=1, padx=5, pady=5)
-    filePathEntry.insert(END, globState.GetOutputPath())
-    filePathEntry.update_idletasks()
+        outputFilePath = StringVar(saveWindow,value=globState.GetOutputPath())
+        filePathEntry = ttk.Entry(saveWindow, textvariable=outputFilePath, width = 50)
+        filePathEntry.grid(row=1, column=1, columnspan=3,  padx=5, pady=5)
 
+        docTypeCombBx = ttk.Combobox(saveWindow, textvariable=outputDocType, values=('docx', 'odt'))
+        docTypeCombBx.grid(row=2, column=1, padx=5, pady=5, sticky=W)
+        docTypeCombBx.current(0)
+        docTypeCombBx.update_idletasks()
+
+        saveBtn = ttk.Button(saveWindow, command=SaveFile, text="Save", width=20)
+        saveBtn.grid(row=2, column=3, padx=5, pady=5, sticky=E)
+
+        saveWindow.wait_window()
+        saveWindowOpen = False
 
 
 

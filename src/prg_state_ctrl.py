@@ -46,8 +46,7 @@ class PrgStateCtrl:
     _imgName = ""
     _imgPath = _execPath + _resSubFolderPath + _imgSubFolderPath
 
-    _saveCount = 0
-    _outputFileName = "results_" + str(_saveCount)
+    _outputFileName = "results"
     _outputFilePath = _execPath
 
     _cachedImage = PIL.Image.new('RGBA', (400, 550), (0,0,0,0))
@@ -87,9 +86,6 @@ class PrgStateCtrl:
             return True
         except:
             return False
-
-    def IncrementSaveCount(self):
-        self._saveCount += 1
 
     def LoadImage(self, imageName):
         if self.isValidImg(imageName):

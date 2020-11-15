@@ -15,11 +15,15 @@ def writeToOdt(filePath, strToWrite):
     print(fullDestFP)
 
     textdoc = OpenDocumentText()
-    textdoc.text.addElement(textElem(text = strToWrite))
+    h1style = Style(name="Heading 1", family="paragraph")
+    h=H(outlinelevel=1, stylename=h1style, text=strToWrite)
+    textdoc.text.addElement(h)
     textdoc.save(fullDestFP)
 
 def writeToDocx(filePath, strToWrite):
     fullDestFP = filePath + ".docx"
+    print('Writing output to...')
+    print(fullDestFP)
     # Create a new docx at specified file location and write the string on it
     doc = docx.Document()
     doc.add_paragraph(strToWrite)
