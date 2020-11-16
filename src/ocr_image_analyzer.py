@@ -6,11 +6,21 @@ import numpy as np
 import imutils
 import cv2
 
-def analyzeImage(inputImagePath, trainedHWModel, show = False):
+model = None
+
+def modelIsValid(trainedHWModelPath):
+    try:
+        global model
+        model = load_model(trainedHWModelPath)
+        return True
+    except:
+        return False
+
+def analyzeImage(inputImagePath, show = False):
 
     # load the handwriting OCR model
     print("[INFO] loading handwriting OCR model...")
-    model = load_model(trainedHWModel)
+    #model = load_model(trainedHWModel)
         
     
     # load the input image from disk, convert it to grayscale, and blur
@@ -133,8 +143,7 @@ def analyzeImage(inputImagePath, trainedHWModel, show = False):
         cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
         cv2.putText(image, label, (x - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 2)
 
-        newImg = image.copy()
-        output_images.append(newImg)
+        output_images.append(image.copy())
         
     added = 0
     for space in spaces:

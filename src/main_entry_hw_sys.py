@@ -13,7 +13,7 @@ except ModuleNotFoundError:
 mainWindow = Tk()
 mainWindow.title("Handwriting Parser")
 mainWindow.geometry('800x600')
-#mainWindow.resizable(False,False)
+mainWindow.resizable(False,False)
 mainWindow.columnconfigure(0, weight=1)
 mainWindow.rowconfigure(0, weight=1)
 
@@ -21,15 +21,28 @@ mainWindow.rowconfigure(0, weight=1)
 
 globState = PSC.PrgStateCtrl()
 cachedImage = PIL.ImageTk.PhotoImage(globState.GetCachedImage())
-imageName = StringVar()
+modelName = StringVar(mainWindow, value=globState._modelName)
+imageName = StringVar(mainWindow, value=globState._imgName)
 
 saveWindow = None
 saveWindowOpen = False
 
-outputFileName = StringVar()
-outputFilePath = StringVar()
+outputFileName = StringVar(saveWindow,value=globState.GetOutputName())
+outputFilePath = StringVar(saveWindow,value=globState.GetOutputPath())
 outputDocType = StringVar()
 #*******************************************************    gui state control
+
+def LoadModel():
+    if not globState.SetModel(modelName.get()):
+        newWindow = Toplevel(mainWindow) 
+    
+        # sets the title of the 
+        # Toplevel widget 
+        newWindow.title("Error") 
+        
+        # A Label widget to show in toplevel 
+        errorLbl = Label(newWindow, text = "Text entered is not a valid model name. Must be in same directory as executable")
+        errorLbl.grid(row=0, column=0, padx=15, pady=15)
 
 def LoadImage():
     if not globState.LoadImage(imageName.get()):
@@ -40,7 +53,7 @@ def LoadImage():
         newWindow.title("Error") 
         
         # A Label widget to show in toplevel 
-        errorLbl = Label(newWindow, text = "Text entered is not a valid image. Must be in same directory as executable")
+        errorLbl = Label(newWindow, text = "Text entered is not a valid image name. Must be in same directory as executable")
         errorLbl.grid(row=0, column=0, padx=15, pady=15)
     else:
         cachedImage = PIL.ImageTk.PhotoImage(globState.GetCachedImage())
@@ -135,7 +148,13 @@ dividerImg = PIL.ImageTk.PhotoImage(PIL.Image.new('RGBA', (5, 600), (100, 100, 1
 dividerImgDisplayLbl = ttk.Label(dividerFrame, image=dividerImg)
 
 rhsFrame = ttk.Frame(content)
-imgLocLbl = ttk.Label(rhsFrame, text="Image name/path")
+
+
+modelLocLbl = ttk.Label(rhsFrame, text="Model name")
+modelLocEntry = ttk.Entry(rhsFrame, textvariable=modelName, width = 42)
+modelLocUpdateBtn = ttk.Button(rhsFrame, command=LoadModel, text="Load Model", width=20)
+
+imgLocLbl = ttk.Label(rhsFrame, text="Image name")
 imgLocEntry = ttk.Entry(rhsFrame, textvariable=imageName, width = 42)
 imgLocUpdateBtn = ttk.Button(rhsFrame, command=LoadImage, text="Load Image", width=20)
 
@@ -158,17 +177,22 @@ dividerFrame.grid(column=1, row=0, sticky="NS")
 dividerImgDisplayLbl.grid(column=0, row=0, padx=5, sticky="NS")
 
 rhsFrame.grid(column=2, row=0, sticky="NSWE")
-rhsFrame.rowconfigure((0,4,8), weight=2)
+rhsFrame.rowconfigure((0,4,8,12), weight=2)
 rhsFrame.columnconfigure((1), weight=1)
-imgLocLbl.grid(column=0, row=1, padx=5, sticky=W)
-imgLocEntry.grid(column=0, row=2, padx=5, columnspan=3, sticky="WE")
-imgLocUpdateBtn.grid(column=2, row=3, padx=5, pady=5, sticky=E)
 
-outputLbl.grid(column=0, row=5, padx=5, sticky=W)
-outputText.grid(column=0, row=6, padx=5, columnspan=3, sticky="WE")
-outputGenBtn.grid(column=2, row=7, padx=5, pady=5, sticky=E)
+modelLocLbl.grid(column=0, row=1, padx=5, sticky=W)
+modelLocEntry.grid(column=0, row=2, padx=5, columnspan=3, sticky="WE")
+modelLocUpdateBtn.grid(column=2, row=3, padx=5, pady=5, sticky=E)
 
-outputSaveBtn.grid(column=2, row=9, padx=5, pady=5, sticky=E)
+imgLocLbl.grid(column=0, row=5, padx=5, sticky=W)
+imgLocEntry.grid(column=0, row=6, padx=5, columnspan=3, sticky="WE")
+imgLocUpdateBtn.grid(column=2, row=7, padx=5, pady=5, sticky=E)
+
+outputLbl.grid(column=0, row=9, padx=5, sticky=W)
+outputText.grid(column=0, row=10, padx=5, columnspan=3, sticky="WE")
+outputGenBtn.grid(column=2, row=11, padx=5, pady=5, sticky=E)
+
+outputSaveBtn.grid(column=2, row=13, padx=5, pady=5, sticky=E)
 
 mainWindow.mainloop()
 

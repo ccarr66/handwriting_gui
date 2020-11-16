@@ -6,7 +6,7 @@ try:
 except ModuleNotFoundError:
     print('Required libraries not found, please install PIL')
 
-debug = False
+debug = True
 
 #********************************************   Program state independent logic
 def isWindowsOS():
@@ -40,8 +40,8 @@ class PrgStateCtrl:
     _resSubFolderPath = "\\res" if isWindowsOS() else "/res"
     _imgSubFolderPath = "\\images" if isWindowsOS() else "/images"
 
-    _modelName = "handwriting.model"
-    _modelPath = _execPath + _resSubFolderPath + filepathSlash + _modelName
+    _modelName = ""
+    _modelPath = _execPath + _resSubFolderPath + filepathSlash
 
     _imgName = ""
     _imgPath = _execPath + _resSubFolderPath + _imgSubFolderPath
@@ -51,7 +51,8 @@ class PrgStateCtrl:
 
     _cachedImage = PIL.Image.new('RGBA', (400, 550), (0,0,0,0))
 
-    _outputMayBegin = False
+    _modelSet = False
+    _imageLoaded = False
     _outputIsValid = False
     _currentOutputImageIdx = 0
     _currentOutputImages = []
@@ -60,6 +61,8 @@ class PrgStateCtrl:
     def __init__(self):
         if(debug):
             self._imgName = "hello_world.png"
+            self._modelName = "handwriting.model"
+        self.SetModel(self._modelName)
         self.LoadImage(self._imgName)
 
     def GetImagePath(self):
@@ -68,8 +71,11 @@ class PrgStateCtrl:
     def GetImageFullPath(self):
         return self._execPath + self._resSubFolderPath + self._imgSubFolderPath + filepathSlash + self._imgName
 
-    def GetModelFullPath(self):
+    def GetModelPath(self):
         return self._modelPath
+
+    def GetModelFullPath(self):
+        return self._modelPath + self._modelName
 
     def GetCachedImage(self):
         return self._cachedImage
@@ -87,11 +93,24 @@ class PrgStateCtrl:
         except:
             return False
 
+    def SetModel(self, modelName):
+        if OCR.modelIsValid(self.GetModelPath() + modelName):
+            self._modelName = modelName
+            self._modelSet = True
+            return True
+        else:
+            return False        
+
     def LoadImage(self, imageName):
         if self.isValidImg(imageName):
             self._imgName = imageName
             self._cachedImage = scaleImage(PIL.Image.open(self.GetImagePath() + self._imgName), 400, 550)
-            self._outputMayBegin = True
+
+            self._imageLoaded = True
+            self._outputIsValid = False;
+            self._currentOutputImages.clear()
+            self._currentOutputImageIdx = 0
+
             return True
         else:
             return False
@@ -99,11 +118,11 @@ class PrgStateCtrl:
     def PerformOCR(self):
         self._currentOutputImages.clear()
 
-        if self._outputMayBegin:
+        if self._modelSet and self._imageLoaded:
             try:
                 self._currentOutputImageIdx = 0
                 self._currentOutputImages.append(self._cachedImage)
-                text, images = OCR.analyzeImage(self.GetImageFullPath(), self.GetModelFullPath())
+                text, images = OCR.analyzeImage(self.GetImageFullPath())
 
                 self._currentOutputText = ""
                 for c in text:
