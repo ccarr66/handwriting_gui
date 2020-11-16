@@ -1,17 +1,28 @@
 # import the necessary packages
 from tensorflow.keras.models import load_model
 from imutils.contours import sort_contours
-from line_segmenter import get_lines
+from utility_functions import *
 import numpy as np
 import imutils
 import cv2
 
-def analyzeImage(inputImagePath, trainedHWModel, show = False):
+model = None
+
+def modelIsValid(trainedHWModelPath):
+    try:
+        global model
+        model = load_model(trainedHWModelPath)
+        return True
+    except:
+        return False
+
+def analyzeImage(inputImagePath, show = False):
 
     # load the handwriting OCR model
     print("[INFO] loading handwriting OCR model...")
-    model = load_model(trainedHWModel)
-
+    #model = load_model(trainedHWModel)
+        
+    
     # load the input image from disk, convert it to grayscale, and blur
     # it to reduce noise
     image = cv2.imread(inputImagePath)  # load image
@@ -33,8 +44,8 @@ def analyzeImage(inputImagePath, trainedHWModel, show = False):
         cnts[line] = imutils.grab_contours(cnts[line])  # returns array of contours
         cnts[line] = sort_contours(cnts[line], method="left-to-right")[0]  # sorts contours left to right
 
-    space_marign = space_margin / (9 * len(lw))
-    print(f'space_margin: {space_margin}')
+    space_marign = space_margin / (8 * len(lw))
+    print(f'space_marign: {space_marign}')
     # initialize the list of contour bounding boxes and associated
     # characters that we'll be OCR'ing
     chars = []
@@ -42,7 +53,7 @@ def analyzeImage(inputImagePath, trainedHWModel, show = False):
     index = 0
     px, py, pw, ph = 0, 0, 0, 0
     skip = False
-    
+
     # loop over the contours
     for line in range(len(lx)):
         for c in cnts[line]:  # iterates through contours array
@@ -102,6 +113,7 @@ def analyzeImage(inputImagePath, trainedHWModel, show = False):
                 index += 1
                 (px, py, pw, ph) = (x, y, w, h)
 
+
     # extract the bounding box locations and padded characters
     boxes = [b[1] for b in chars]
     chars = np.array([c[0] for c in chars], dtype="float32")
@@ -115,6 +127,7 @@ def analyzeImage(inputImagePath, trainedHWModel, show = False):
     labelNames += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     labelNames = [l for l in labelNames]
     output_labels = []
+    output_images = []
 
     # loop over the predictions and bounding box locations together
     for (pred, (x, y, w, h)) in zip(preds, boxes):
@@ -130,16 +143,14 @@ def analyzeImage(inputImagePath, trainedHWModel, show = False):
         cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
         cv2.putText(image, label, (x - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 2)
 
-        # show the image
-        #cv2.imshow("Image", image)
-        #cv2.waitKey(0)
+        output_images.append(image.copy())
         
     added = 0
     for space in spaces:
         output_labels.insert(space + added, ' ')
         added += 1
-    # some function to open .docx or .odt to write to. pass output_labels
-    return output_labels
+
+    return (output_labels, output_images)
 
 # USAGE
 # python ocr_handwriting.py --model handwriting.model --image images/umbc_address.png
