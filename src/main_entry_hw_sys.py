@@ -30,29 +30,19 @@ saveWindowOpen = False
 outputFileName = StringVar(saveWindow,value=globState.GetOutputName())
 outputFilePath = StringVar(saveWindow,value=globState.GetOutputPath())
 outputDocType = StringVar()
-#*******************************************************    gui state control
 
+#*******************************************************    gui state control
 def LoadModel():
     if not globState.SetModel(modelName.get()):
-        newWindow = Toplevel(mainWindow) 
-    
-        # sets the title of the 
-        # Toplevel widget 
+        newWindow = Toplevel(mainWindow)
         newWindow.title("Error") 
-        
-        # A Label widget to show in toplevel 
         errorLbl = Label(newWindow, text = "Text entered is not a valid model name. Must be in same directory as executable")
         errorLbl.grid(row=0, column=0, padx=15, pady=15)
 
 def LoadImage():
     if not globState.LoadImage(imageName.get()):
         newWindow = Toplevel(mainWindow) 
-    
-        # sets the title of the 
-        # Toplevel widget 
         newWindow.title("Error") 
-        
-        # A Label widget to show in toplevel 
         errorLbl = Label(newWindow, text = "Text entered is not a valid image name. Must be in same directory as executable")
         errorLbl.grid(row=0, column=0, padx=15, pady=15)
     else:
@@ -135,7 +125,7 @@ def SaveDialog():
 
 
 
-#*******************************************************    WIDGETS
+#*******************************************************    WIDGET CONFIG
 content = ttk.Frame(mainWindow)
 
 lhsFrame = ttk.Frame(content)
@@ -148,8 +138,6 @@ dividerImg = PIL.ImageTk.PhotoImage(PIL.Image.new('RGBA', (5, 600), (100, 100, 1
 dividerImgDisplayLbl = ttk.Label(dividerFrame, image=dividerImg)
 
 rhsFrame = ttk.Frame(content)
-
-
 modelLocLbl = ttk.Label(rhsFrame, text="Model name")
 modelLocEntry = ttk.Entry(rhsFrame, textvariable=modelName, width = 42)
 modelLocUpdateBtn = ttk.Button(rhsFrame, command=LoadModel, text="Load Model", width=20)
@@ -164,8 +152,9 @@ outputGenBtn = ttk.Button(rhsFrame, command = ParseImage, text="Generate Output"
 
 outputSaveBtn = ttk.Button(rhsFrame, command=SaveDialog, text="Save Output", width=20)
 
-#******************************************************     GRID
-content.grid(column=0, row=0, sticky="NSEW")
+#******************************************************     GRID CONFIG
+content.grid(column=0, row=0, sticky="NS")
+content.columnconfigure((1,3), weight=1)
 
 lhsFrame.grid(column=0, row=0, sticky="NS")
 lhsFrame.rowconfigure((0,2), weight=2)
@@ -173,10 +162,10 @@ imgDisplayLbl.grid(column=0, row=1, padx=5, columnspan=3)
 prevBtn.grid(column=0, row=4, padx=5, pady=5, sticky=S)
 nextBtn.grid(column=2, row=4, padx=5, pady=5, sticky=S)
 
-dividerFrame.grid(column=1, row=0, sticky="NS")
-dividerImgDisplayLbl.grid(column=0, row=0, padx=5, sticky="NS")
+dividerFrame.grid(column=2, row=0)
+dividerImgDisplayLbl.grid(column=0, row=0, padx=5)
 
-rhsFrame.grid(column=2, row=0, sticky="NSWE")
+rhsFrame.grid(column=4, row=0, sticky="NS")
 rhsFrame.rowconfigure((0,4,8,12), weight=2)
 rhsFrame.columnconfigure((1), weight=1)
 
@@ -195,5 +184,3 @@ outputGenBtn.grid(column=2, row=11, padx=5, pady=5, sticky=E)
 outputSaveBtn.grid(column=2, row=13, padx=5, pady=5, sticky=E)
 
 mainWindow.mainloop()
-
-
