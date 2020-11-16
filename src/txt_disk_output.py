@@ -28,3 +28,11 @@ def writeToDocx(filePath, strToWrite):
     doc = docx.Document()
     doc.add_paragraph(strToWrite)
     doc.save(fullDestFP)
+
+def writeToTxt(filePath, strToWrite):
+    fullDestFP = filePath + ".txt"
+    print('Writing output to...')
+    print(fullDestFP)
+
+    with open(fullDestFP, "w") as file:
+        file.write(strToWrite)

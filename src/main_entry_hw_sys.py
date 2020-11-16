@@ -83,6 +83,8 @@ def SaveFile():
         OUT.writeToDocx(filePath, globState.GetOutputText())
     if outputDocType.get() == 'odt':
         OUT.writeToOdt(filePath, globState.GetOutputText())
+    if outputDocType.get() == 'txt':
+        OUT.writeToTxt(filePath, globState.GetOutputText())
     saveWindow.destroy()
 
 def SaveDialog():
@@ -112,7 +114,7 @@ def SaveDialog():
         filePathEntry = ttk.Entry(saveWindow, textvariable=outputFilePath, width = 50)
         filePathEntry.grid(row=1, column=1, columnspan=3,  padx=5, pady=5)
 
-        docTypeCombBx = ttk.Combobox(saveWindow, textvariable=outputDocType, values=('docx', 'odt'))
+        docTypeCombBx = ttk.Combobox(saveWindow, textvariable=outputDocType, values=('.docx', '.odt', '.txt'))
         docTypeCombBx.grid(row=2, column=1, padx=5, pady=5, sticky=W)
         docTypeCombBx.current(0)
         docTypeCombBx.update_idletasks()
