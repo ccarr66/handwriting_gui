@@ -20,7 +20,9 @@ mainWindow.rowconfigure(0, weight=1)
 #*******************************************************    init glob state
 
 globState = PSC.PrgStateCtrl()
-cachedImage = PIL.ImageTk.PhotoImage(globState.GetCachedImage())
+pCachImage, pCacheLabel = globState.GetCachedImage()
+cachedImage = PIL.ImageTk.PhotoImage(pCachImage)
+cachedLabel = pCacheLabel
 modelName = StringVar(mainWindow, value=globState._modelName)
 imageName = StringVar(mainWindow, value=globState._imgName)
 
@@ -46,7 +48,10 @@ def LoadImage():
         errorLbl = Label(newWindow, text = "Text entered is not a valid image name. Must be in same directory as executable")
         errorLbl.grid(row=0, column=0, padx=15, pady=15)
     else:
-        cachedImage = PIL.ImageTk.PhotoImage(globState.GetCachedImage())
+        image, label = globState.GetCachedImage()
+        cachedImage = PIL.ImageTk.PhotoImage(image)
+        cachedLabel = label
+        imageLabel.configure(text=label)
         imgDisplayLbl.configure(image=cachedImage)
         imgDisplayLbl.image = cachedImage
         imgDisplayLbl.update_idletasks()
@@ -60,30 +65,36 @@ def ParseImage():
     outputText.update_idletasks()
     outputText['state'] = "disabled"
 
-    cachedImage = PIL.ImageTk.PhotoImage(globState.GetNextOutputImage())
+    image, label = globState.GetNextOutputImage()
+    cachedImage = PIL.ImageTk.PhotoImage(image)
+    imageLabel.configure(text=label)
     imgDisplayLbl.configure(image=cachedImage)
     imgDisplayLbl.image = cachedImage
     imgDisplayLbl.update_idletasks()
 
 def NextImage():
-    cachedImage = PIL.ImageTk.PhotoImage(globState.GetNextOutputImage())
+    image, label = globState.GetNextOutputImage()
+    cachedImage = PIL.ImageTk.PhotoImage(image)
+    imageLabel.configure(text=label)
     imgDisplayLbl.configure(image=cachedImage)
     imgDisplayLbl.image = cachedImage
     imgDisplayLbl.update_idletasks()
 
 def PrevImage():
-    cachedImage = PIL.ImageTk.PhotoImage(globState.GetPrevOutputImage())
+    image, label = globState.GetPrevOutputImage()
+    cachedImage = PIL.ImageTk.PhotoImage(image)
+    imageLabel.configure(text=label)
     imgDisplayLbl.configure(image=cachedImage)
     imgDisplayLbl.image = cachedImage
     imgDisplayLbl.update_idletasks()
 
 def SaveFile():
     filePath = outputFilePath.get() + PSC.filepathSlash + outputFileName.get()
-    if outputDocType.get() == 'docx':
+    if outputDocType.get() == '.docx':
         OUT.writeToDocx(filePath, globState.GetOutputText())
-    if outputDocType.get() == 'odt':
+    if outputDocType.get() == '.odt':
         OUT.writeToOdt(filePath, globState.GetOutputText())
-    if outputDocType.get() == 'txt':
+    if outputDocType.get() == '.txt':
         OUT.writeToTxt(filePath, globState.GetOutputText())
     saveWindow.destroy()
 
@@ -132,6 +143,7 @@ content = ttk.Frame(mainWindow)
 
 lhsFrame = ttk.Frame(content)
 imgDisplayLbl = ttk.Label(lhsFrame, image=cachedImage)
+imageLabel =  ttk.Label(lhsFrame, text=cachedLabel)
 prevBtn = ttk.Button(lhsFrame, command=PrevImage, text="Prev")
 nextBtn = ttk.Button(lhsFrame, command=NextImage, text="Next")
 
@@ -161,6 +173,7 @@ content.columnconfigure((1,3), weight=1)
 lhsFrame.grid(column=0, row=0, sticky="NS")
 lhsFrame.rowconfigure((0,2), weight=2)
 imgDisplayLbl.grid(column=0, row=1, padx=5, columnspan=3)
+imageLabel.grid(column=1, row=4, padx=5, pady=5, sticky=S)
 prevBtn.grid(column=0, row=4, padx=5, pady=5, sticky=S)
 nextBtn.grid(column=2, row=4, padx=5, pady=5, sticky=S)
 

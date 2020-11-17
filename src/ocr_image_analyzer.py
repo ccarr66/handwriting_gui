@@ -23,18 +23,27 @@ def analyzeImage(inputImagePath, show = False):
     #model = load_model(trainedHWModel)
         
     
+    output_images = []
+    output_image_labels = []
+
     # load the input image from disk, convert it to grayscale, and blur
     # it to reduce noise
     image = cv2.imread(inputImagePath)  # load image
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  # converts image to greyscale
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)  # blurs image
 
-    lines = get_lines(image, show)
+    lines = get_lines(image, output_images, output_image_labels, show)
     lx, ly, lw, lh = lines
+
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)  # blurs image
+    output_images.append(blurred)
+    output_image_labels.append("Blurred")
+
 
     # perform edge detection, find contours in the edge map, and sort the
     # resulting contours from left-to-right
     edged = cv2.Canny(blurred, 30, 150)  # grey-scale, edge-detected image
+    output_images.append(edged)
+    output_image_labels.append("Edged")
     cnts = [[]] * len(lx)
     space_margin = 0
     for line in range(len(lx)):
@@ -127,7 +136,6 @@ def analyzeImage(inputImagePath, show = False):
     labelNames += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     labelNames = [l for l in labelNames]
     output_labels = []
-    output_images = []
 
     # loop over the predictions and bounding box locations together
     for (pred, (x, y, w, h)) in zip(preds, boxes):
@@ -144,13 +152,14 @@ def analyzeImage(inputImagePath, show = False):
         cv2.putText(image, label, (x - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 2)
 
         output_images.append(image.copy())
+        output_image_labels.append("Character: " + label)
         
     added = 0
     for space in spaces:
         output_labels.insert(space + added, ' ')
         added += 1
 
-    return (output_labels, output_images)
+    return (output_labels, output_images, output_image_labels)
 
 # USAGE
 # python ocr_handwriting.py --model handwriting.model --image images/umbc_address.png

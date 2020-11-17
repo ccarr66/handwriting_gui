@@ -6,6 +6,9 @@ try:
 except ModuleNotFoundError:
     print('Required libraries not found, please install PIL')
 
+if __name__ == "__main__":
+    raise Exception('Cannot be called as main script')
+
 debug = True
 
 #********************************************   Program state independent logic
@@ -56,12 +59,13 @@ class PrgStateCtrl:
     _outputIsValid = False
     _currentOutputImageIdx = 0
     _currentOutputImages = []
+    _currentOutputImageLabels = []
     _currentOutputText = ""
 
     def __init__(self):
         if(debug):
-            self._imgName = "hello_world.png"
-            self._modelName = "handwriting.model"
+            self._imgName = "perry3.png"
+            self._modelName = "handwriting_v1.model"
         self.SetModel(self._modelName)
         self.LoadImage(self._imgName)
 
@@ -78,7 +82,7 @@ class PrgStateCtrl:
         return self._modelPath + self._modelName
 
     def GetCachedImage(self):
-        return self._cachedImage
+        return (self._cachedImage, "Cached Image")
 
     def GetOutputPath(self):
         return self._outputFilePath
@@ -109,6 +113,7 @@ class PrgStateCtrl:
             self._imageLoaded = True
             self._outputIsValid = False;
             self._currentOutputImages.clear()
+            self._currentOutputImageLabels.clear()
             self._currentOutputImageIdx = 0
 
             return True
@@ -117,12 +122,14 @@ class PrgStateCtrl:
 
     def PerformOCR(self):
         self._currentOutputImages.clear()
+        self._currentOutputImageLabels.clear()
 
         if self._modelSet and self._imageLoaded:
             try:
                 self._currentOutputImageIdx = 0
                 self._currentOutputImages.append(self._cachedImage)
-                text, images = OCR.analyzeImage(self.GetImageFullPath())
+                self._currentOutputImageLabels.append("Original")
+                text, images, imageLabels = OCR.analyzeImage(self.GetImageFullPath())
 
                 self._currentOutputText = ""
                 for c in text:
@@ -132,6 +139,9 @@ class PrgStateCtrl:
                     img_pil = PIL.Image.fromarray(img)
                     scaledImg = scaleImage(img_pil,400,550)
                     self._currentOutputImages.append(scaledImg)
+                
+                for label in imageLabels:
+                    self._currentOutputImageLabels.append(label)
 
                 self._outputIsValid = True
             except:
@@ -150,9 +160,9 @@ class PrgStateCtrl:
             else:
                 self._currentOutputImageIdx += 1
                 
-            return self._currentOutputImages[self._currentOutputImageIdx]
+            return (self._currentOutputImages[self._currentOutputImageIdx], self._currentOutputImageLabels[self._currentOutputImageIdx])
         else:
-            return self._cachedImage
+            return (self._cachedImage, "Cached Image")
 
     def GetPrevOutputImage(self):
         if self._outputIsValid:
@@ -160,7 +170,8 @@ class PrgStateCtrl:
                 self._currentOutputImageIdx = len(self._currentOutputImages) - 1
             else:
                 self._currentOutputImageIdx -= 1
-                
-            return self._currentOutputImages[self._currentOutputImageIdx]
+            
+            return (self._currentOutputImages[self._currentOutputImageIdx], self._currentOutputImageLabels[self._currentOutputImageIdx])
         else:
-            return self._cachedImage
+            return (self._cachedImage, "Cached Image")
+

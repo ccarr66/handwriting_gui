@@ -9,6 +9,9 @@ except ModuleNotFoundError:
     print('Required libraries not found, please install odfpy and python-docx')
 
 
+if __name__ == "__main__":
+    raise Exception('Cannot be called as main script')
+
 def writeToOdt(filePath, strToWrite):
     fullDestFP = filePath + ".odt"
     print('Writing output to...')
