@@ -8,7 +8,7 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "/home/connor/source/repos/_ASSIGNMENTS_/4317 Assignments/Project/handwriting_gui/src/main_entry_hw_sys.py",
             "console": "integratedTerminal",
             "args": []
         }

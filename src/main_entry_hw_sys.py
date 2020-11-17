@@ -18,7 +18,6 @@ mainWindow.columnconfigure(0, weight=1)
 mainWindow.rowconfigure(0, weight=1)
 
 #*******************************************************    init glob state
-
 globState = PSC.PrgStateCtrl()
 pCachImage, pCacheLabel = globState.GetCachedImage()
 cachedImage = PIL.ImageTk.PhotoImage(pCachImage)
